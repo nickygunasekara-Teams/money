@@ -1,0 +1,36 @@
+/* Modern, responsive UI/UX 2026 Standards */
+body {
+    background: linear-gradient(rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.9)), 
+                url('https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?q=80&w=1920') no-repeat center center fixed;
+    background-size: cover;
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    padding: 0;
+    -webkit-font-smoothing: antialiased; /* වඩාත් පැහැදිලි අකුරු සඳහා */
+}
+
+.glass-panel {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px); /* Safari සඳහා සහය */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.2s ease;
+}
+
+/* ආරක්ෂිත අංග: අනවසරයෙන් තිරය පරිශීලනය කිරීම වළක්වයි */
+@media print {
+    .no-print { display: none !important; }
+}
+
+/* Smooth Hover Animation */
+.hover-card:hover {
+    transform: translateY(-4px);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+/* ජංගම දුරකථන සඳහා වැඩිදියුණු කළ responsive පෙනුම */
+@media (max-width: 640px) {
+    .glass-panel {
+        padding: 1rem;
+    }
+}

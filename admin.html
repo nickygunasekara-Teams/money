@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Money Israel - Executive Core Backoffice Control Room</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #0f172a; color: white; }
+        .glass-panel { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        #auth-guard-overlay { position: fixed; inset: 0; background: #0f172a; z-index: 9999; display: flex; justify-content: center; align-items: center; color: #f59e0b; font-weight: bold; font-family: monospace; transition: opacity 0.3s; }
+    </style>
+</head>
+<body class="p-3 md:p-6 min-h-screen flex flex-col justify-between">
+
+    <div id="auth-guard-overlay">Authenticating Matrix Clearance...</div>
+
+    <div class="max-w-7xl mx-auto w-full space-y-6 flex-grow">
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center bg-white/5 p-4 rounded-xl border border-white/10 gap-4">
+            <div class="flex items-center gap-3">
+                <img src="logo.png" onerror="this.style.display='none';" class="h-8 max-w-[120px] object-contain">
+                <div>
+                    <h1 class="text-xl font-black text-yellow-500 tracking-wider">MONEY MASTER BACKOFFICE CONTROL</h1>
+                    <p class="text-xs text-gray-400 font-mono">Unified Nostro Ledger Auditing & Cashier Till Monitoring Interface</p>
+                </div>
+            </div>
+            <div class="flex flex-wrap gap-2 items-center w-full md:w-auto justify-end font-mono">
+                <button id="btn-master-download" class="text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-3 py-1.5 rounded-lg font-bold hover:bg-emerald-500 hover:text-black transition">DOWNLOAD MASTER SYSTEM LOGS (.CSV)</button>
+                <a href="balancer.html" class="text-xs bg-blue-500/20 text-blue-400 border border-blue-500/30 px-3 py-1.5 rounded-lg text-center hover:bg-blue-500 hover:text-white transition">Till Zone</a>
+                <a href="register.html" class="text-xs bg-white/10 text-white px-3 py-1.5 rounded-lg text-center hover:bg-white/20 transition">KYC Deck</a>
+                <button id="btn-logout" class="text-xs bg-red-500/20 text-red-400 border border-red-500/30 px-3 py-1.5 rounded-lg text-center hover:bg-red-500 hover:text-white transition">Logout</button>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 font-mono">
+            <div class="glass-panel rounded-xl p-4 text-center border-l-4 border-l-green-500 bg-gradient-to-br from-slate-900 to-black">
+                <p class="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Total Combined Cash In Tills</p>
+                <p id="stat-total-cash" class="text-2xl font-black text-green-400 mt-1">0.00 ₪</p>
+            </div>
+            <div class="glass-panel rounded-xl p-4 text-center border-l-4 border-l-blue-500 bg-gradient-to-br from-slate-900 to-black">
+                <p class="text-[10px] text-gray-400 uppercase font-bold tracking-wider">System Customer Registries Count</p>
+                <p id="stat-total-tx-count" class="text-2xl font-black text-blue-400 mt-1">0</p>
+            </div>
+            <div class="glass-panel rounded-xl p-4 text-center border-l-4 border-l-yellow-500 bg-gradient-to-br from-slate-900 to-black">
+                <p class="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Total Remittance Volume Dispatched</p>
+                <p id="stat-total-tx-amount" class="text-2xl font-black text-yellow-500 mt-1">0.00 ₪</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="glass-panel rounded-2xl p-5 space-y-4">
+                <h2 class="text-sm font-bold text-yellow-500 border-b border-white/10 pb-2 uppercase tracking-wide">1. Network Operations Control</h2>
+                <form id="staff-provision-form" class="space-y-3 text-xs">
+                    <h3 class="text-gray-400 font-bold uppercase tracking-widest text-[9px]">Provision Cashier Node</h3>
+                    <div><input type="text" id="staff-name" class="w-full bg-white/5 border border-white/10 p-2 rounded-lg text-white" required placeholder="Staff Full Name"></div>
+                    <div><input type="email" id="staff-email" class="w-full bg-white/5 border border-white/10 p-2 rounded-lg text-white" required placeholder="staff@money.com"></div>
+                    <button type="submit" class="w-full bg-yellow-500 text-black font-black py-2 rounded-lg uppercase tracking-wider transition">Provision Cashier Operator</button>
+                </form>
+                <div class="pt-4 border-t border-white/10 space-y-3">
+                    <form id="fx-rate-form" class="space-y-3 text-xs">
+                        <h3 class="text-gray-400 font-bold uppercase tracking-widest text-[9px]">Broadcast Conversion FX Rate</h3>
+                        <div><input type="number" step="0.01" id="new-fx-rate" class="w-full bg-white/5 border border-white/10 p-2 rounded-lg text-white font-mono" placeholder="1 ILS to LKR Rate (e.g. 85.30)" required></div>
+                        <button type="submit" class="w-full bg-gradient-to-r from-amber-500 to-yellow-500 text-black font-black py-2 rounded-lg uppercase tracking-wider transition">Broadcast Rate Updates</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="glass-panel rounded-2xl p-5 space-y-3 bg-gradient-to-b from-slate-900 to-slate-950 flex flex-col justify-between">
+                <div>
+                    <h2 class="text-sm font-bold text-yellow-500 border-b border-white/10 pb-2 uppercase tracking-wide">2. Customer Wallets Auditor</h2>
+                    <div class="mt-3 mb-2">
+                        <input type="text" id="admin-customer-search" class="w-full bg-black/40 border border-white/10 p-2 rounded-lg text-white text-xs font-mono transition focus:border-blue-500 focus:outline-none" placeholder="Search by Name, CIF, Phone, or Email...">
+                    </div>
+                    <p class="text-[10px] text-gray-400">Consolidated live tracker interface mapping all customer wallet ledger balances in real-time matrix.</p>
+                    <div class="overflow-y-auto max-h-[180px] space-y-2 pt-3 font-mono text-xs" id="admin-wallets-container">
+                        <p class="text-gray-500 text-center py-2">Syncing wallet vaults...</p>
+                    </div>
+                </div>
+                <button id="btn-download-custom-customers" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-mono font-bold text-[11px] py-3 rounded-xl uppercase tracking-wider shadow transition mt-2">
+                    Export Master Spreadsheet (.CSV)
+                </button>
+            </div>
+
+            <div class="glass-panel rounded-2xl p-5 space-y-4">
+                <h2 class="text-sm font-bold text-yellow-500 border-b border-white/10 pb-2 uppercase tracking-wide">3. Cashier Tills Real-Time Auditor</h2>
+                <div class="overflow-y-auto max-h-[350px] space-y-3" id="till-ledger-container">
+                    <p class="text-gray-500 text-xs text-center py-4">Awaiting data stream sync...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-panel rounded-2xl p-4 space-y-2">
+            <h2 class="text-sm font-bold text-blue-400 uppercase tracking-wide border-b border-white/10 pb-1.5">4. Sri Lankan Bank Settlement Payout Ledger (Live Audit Stream)</h2>
+            <div class="overflow-x-auto w-full">
+                <table class="w-full text-left text-xs font-mono border-collapse">
+                    <thead>
+                        <tr class="border-b border-white/10 text-gray-400 uppercase text-[10px]">
+                            <th class="py-2 px-1">TXN ID</th>
+                            <th class="py-2 px-1">Customer</th>
+                            <th class="py-2 px-1">SL Beneficiary Name</th>
+                            <th class="py-2 px-1">SL Destination Bank</th>
+                            <th class="py-2 px-1">Account No</th>
+                            <th class="py-2 px-1 text-right">LKR Sent</th>
+                            <th class="py-2 px-1 text-right">Debit ILS</th>
+                            <th class="py-2 px-1 text-center">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sl-bank-payout-tbody" class="divide-y divide-white/5 text-gray-200">
+                        <tr><td colspan="8" class="text-center py-4 text-gray-500">Awaiting payout data stream synchronization...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <footer class="w-full max-w-7xl mx-auto text-center text-[10px] text-gray-500 mt-6">
+        &copy; 2026 Money Israel Backoffice Infrastructure Ecosystem Layer.
+    </footer>
+
+    <script type="module">
+        import MONEY_CONFIG from './js/config.js';
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, getDoc, onSnapshot, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        const app = initializeApp(MONEY_CONFIG.firebase); 
+        const db = getFirestore(app); 
+        const auth = getAuth(app);
+
+        // Security Guard & Context
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                window.location.href = "index.html";
+            } else {
+                try {
+                    const staffDoc = await getDoc(doc(db, "staff", user.email));
+                    if (staffDoc.exists() && staffDoc.data().role !== "admin") {
+                        window.location.href = "balancer.html"; 
+                    } else {
+                        document.getElementById('auth-guard-overlay').style.display = 'none';
+                    }
+                } catch(err) {
+                    document.getElementById('auth-guard-overlay').innerHTML = "Security Error: Blocked.";
+                }
+            }
+        });
+
+        // --- IDLE TIMEOUT SECURITY (AUTO-LOGOUT AFTER 3 MINS) ---
+        const IDLE_TIMEOUT_MINUTES = 3; 
+        let idleTime = 0;
+        function resetIdleTimer() { idleTime = 0; }
+        window.onload = resetIdleTimer; document.onmousemove = resetIdleTimer; document.onkeypress = resetIdleTimer; document.ontouchstart = resetIdleTimer; document.onclick = resetIdleTimer;
+        setInterval(() => {
+            idleTime++;
+            if (idleTime >= IDLE_TIMEOUT_MINUTES) {
+                alert("Session Expired: Terminal locked due to inactivity.");
+                signOut(auth).then(() => { sessionStorage.clear(); window.location.href = "index.html"; });
+            }
+        }, 60000); 
+
+        document.getElementById('btn-logout').addEventListener('click', () => {
+            signOut(auth).then(() => { sessionStorage.clear(); window.location.href = "index.html"; });
+        });
+
+        // Provision Staff Member
+        document.getElementById('staff-provision-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('staff-email').value.toLowerCase().trim();
+            const name = document.getElementById('staff-name').value.trim();
+            const btn = e.target.querySelector('button');
+            btn.disabled = true; btn.textContent = "Dispatched Request Node...";
+
+            try {
+                const tempPassword = "Password-" + Math.floor(100000 + Math.random() * 900000);
+                await createUserWithEmailAndPassword(auth, email, tempPassword);
+                await setDoc(doc(db, "staff", email), { fullName: name, email, role: "user", createdAt: new Date().toISOString() });
+                await sendPasswordResetEmail(auth, email);
+                alert(`Staff Node Authorized! Security Invitation link forwarded to: ${email}`);
+                document.getElementById('staff-provision-form').reset();
+            } catch (err) { alert("Security Matrix Registry Failure."); }
+            finally { btn.disabled = false; btn.textContent = "Provision Cashier Operator"; }
+        });
+
+        // Broadcast FX Rate
+        document.getElementById('fx-rate-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const rateValue = parseFloat(document.getElementById('new-fx-rate').value);
+            try {
+                await setDoc(doc(db, "system", "exchange_rate"), { rate: rateValue, source: "Admin Console", updatedAt: new Date().toISOString() });
+                alert("FX Conversion Rate Updated!"); document.getElementById('fx-rate-form').reset();
+            } catch (err) { alert("Error broadcasting rate values."); }
+        });
+
+        // --- LIVE CUSTOMER SEARCH ENGINE ---
+        let globalCustomersData = [];
+
+        function renderAdminCustomers(customersList) {
+            const container = document.getElementById('admin-wallets-container');
+            container.innerHTML = "";
+            if (customersList.length === 0) {
+                container.innerHTML = `<p class="text-gray-500 text-center py-2">No customers found.</p>`;
+                return;
+            }
+            customersList.forEach(c => {
+                const card = document.createElement('div');
+                card.className = "bg-white/5 p-2 rounded-lg flex justify-between items-center border border-white/5";
+                card.innerHTML = `<div><p class="font-sans font-semibold text-white">${c.fullName}</p><p class="text-[9px] text-gray-500">CIF: ${c.cifNumber} | Mob: ${c.phoneNumber}</p></div><div class="text-green-400 font-bold font-mono">${(c.walletBalance || 0).toFixed(2)} ₪</div>`;
+                container.appendChild(card);
+            });
+        }
+
+        onSnapshot(collection(db, "customers"), (snapshot) => {
+            globalCustomersData = [];
+            let customerCount = 0;
+            snapshot.forEach(docSnap => {
+                customerCount++;
+                globalCustomersData.push(docSnap.data());
+            });
+            document.getElementById('stat-total-tx-count').textContent = customerCount;
+            const currentSearchTerm = document.getElementById('admin-customer-search').value.toLowerCase().trim();
+            if (currentSearchTerm) {
+                const event = new Event('input');
+                document.getElementById('admin-customer-search').dispatchEvent(event);
+            } else {
+                renderAdminCustomers(globalCustomersData);
+            }
+        });
+
+        document.getElementById('admin-customer-search').addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase().trim();
+            if (!term) {
+                renderAdminCustomers(globalCustomersData);
+                return;
+            }
+            const filteredCustomers = globalCustomersData.filter(c => {
+                return (c.fullName && c.fullName.toLowerCase().includes(term)) || 
+                       (c.cifNumber && c.cifNumber.toLowerCase().includes(term)) || 
+                       (c.phoneNumber && c.phoneNumber.includes(term)) || 
+                       (c.email && c.email.toLowerCase().includes(term));
+            });
+            renderAdminCustomers(filteredCustomers);
+        });
+
+        // Live Realtime Bank Payout Table
+        onSnapshot(collection(db, "transactions"), (snapshot) => {
+            let totalVolume = 0; const tbody = document.getElementById('sl-bank-payout-tbody'); tbody.innerHTML = "";
+            let dataRowsFound = false;
+
+            snapshot.forEach(docSnap => {
+                const t = docSnap.data();
+                if(t.destinationBank) { 
+                    dataRowsFound = true;
+                    totalVolume += parseFloat(t.debitILS || t.amountILS) || 0;
+                    const row = document.createElement('tr'); row.className = "border-b border-white/5 hover:bg-white/5 transition";
+                    row.innerHTML = `<td class="py-2 px-1 text-yellow-500 font-bold">${t.transactionId}</td><td class="py-2 px-1 font-sans">${t.customerName || 'Client'}</td><td class="py-2 px-1 font-sans font-semibold text-white">${t.beneficiaryName}</td><td class="py-2 px-1 text-blue-400">${t.destinationBank}</td><td class="py-2 px-1 font-bold">${t.beneficiaryAccount}</td><td class="py-2 px-1 text-right text-green-400 font-bold">${parseFloat(t.amountLKR || 0).toLocaleString('en-US', {minimumFractionDigits:2})}</td><td class="py-2 px-1 text-right text-amber-400 font-bold">${parseFloat(t.debitILS || t.amountILS).toFixed(2)} ₪</td><td class="py-2 px-1 text-center"><span class="bg-green-500/20 text-green-400 px-1.5 py-0.5 rounded text-[10px] uppercase font-bold">Settled</span></td>`;
+                    tbody.appendChild(row);
+                }
+            });
+            if(!dataRowsFound) tbody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-gray-500">No outbound SL bank remittance vouchers captured in network.</td></tr>`;
+            document.getElementById('stat-total-tx-amount').textContent = totalVolume.toFixed(2) + " ₪";
+        });
+
+        // Realtime Consolidated Cashier Tills Auditor
+        onSnapshot(collection(db, "tills"), (snapshot) => {
+            const container = document.getElementById('till-ledger-container'); container.innerHTML = "";
+            let accumulatedTillsCash = 0;
+
+            snapshot.forEach((docSnap) => {
+                const data = docSnap.data(); accumulatedTillsCash += parseFloat(data.totalCashILS) || 0;
+                const tillCard = document.createElement('div'); tillCard.className = "bg-black/40 p-3 rounded-xl border border-white/5 space-y-1.5 text-xs";
+                tillCard.innerHTML = `<div class="flex justify-between items-center"><div><p class="font-bold text-gray-200">${data.cashierName}</p><p class="text-[9px] text-gray-500">${data.cashierEmail}</p></div><div class="font-mono text-green-400 font-bold text-sm">${parseFloat(data.totalCashILS).toFixed(2)} ₪</div></div><p class="text-[9px] text-gray-400 font-mono">Last Network Sync Connection: ${new Date(data.lastSyncAt).toLocaleTimeString()}</p>`;
+                container.appendChild(tillCard);
+            });
+            document.getElementById('stat-total-cash').textContent = accumulatedTillsCash.toFixed(2) + " ₪";
+        });
+
+        // Master Global System Log CSV Exporter
+        document.getElementById('btn-master-download').addEventListener('click', async () => {
+            try {
+                const qSnap = await getDocs(collection(db, "transactions"));
+                let csvRows = ["Transaction_Ref_ID,CIF_ID,Client_Name,Beneficiary_Name,Destination_Bank,Account_No,Amount_LKR,Debit_ILS,Timestamp"];
+                qSnap.forEach(docSnap => { const t = docSnap.data(); csvRows.push(`"${t.transactionId}","${t.cifNumber}","${t.customerName || '-'}","${t.beneficiaryName || '-'}","${t.destinationBank || '-'}","${t.beneficiaryAccount || '-'}","${t.amountLKR || 0}","${t.debitILS || t.amountILS}","${t.timestamp}"`); });
+                const blob = new Blob([csvRows.join("\n")], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.setAttribute("download", `Master_System_Ledger_Report.csv`);
+                document.body.appendChild(link); link.click(); document.body.removeChild(link);
+            } catch(err) { alert("Report generation failed."); }
+        });
+
+        // Download Customized Full Registered Customers List
+        document.getElementById('btn-download-custom-customers').addEventListener('click', async () => {
+            try {
+                const qSnap = await getDocs(collection(db, "customers"));
+                let csvRows = ["CIF_Number,Full_Name,Email,Phone_Number,Passport_No,Income_Source,Wallet_Balance_ILS,Created_At"];
+                qSnap.forEach(docSnap => { const c = docSnap.data(); csvRows.push(`"${c.cifNumber}","${c.fullName}","${c.email}","${c.phoneNumber}","${c.passportNumber || '-'}","${c.incomeSource}","${c.walletBalance}","${c.createdAt}"`); });
+                const blob = new Blob([csvRows.join("\n")], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.setAttribute("download", `Master_Customer_Directory_Report.csv`);
+                document.body.appendChild(link); link.click(); document.body.removeChild(link);
+            } catch(err) { alert("Directory Processing Error."); }
+        });
+    </script>
+</body>
+</html>
